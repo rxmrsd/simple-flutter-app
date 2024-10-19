@@ -1,0 +1,6 @@
+{
+  "projects": {
+    "default": "myapp-prod-d577a",
+    "dev": "myapp-dev-41de2"
+  }
+}
