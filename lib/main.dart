@@ -1,6 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'config.dart';
 
-void main() {
+void main() async {
+  const apiKey = String.fromEnvironment('apiKey');
+  const authDomain = String.fromEnvironment('authDomain');
+  const projectId = String.fromEnvironment('projectId');
+  const storageBucket = String.fromEnvironment('storageBucket');
+  const messagingSenderId = String.fromEnvironment('messagingSenderId');
+  const appId = String.fromEnvironment('appId');
+
+  await Firebase.initializeApp(
+    options: const FirebaseOptions(
+      apiKey: apiKey,
+      authDomain: authDomain,
+      projectId: projectId,
+      storageBucket: storageBucket,
+      messagingSenderId: messagingSenderId,
+      appId: appId
+    ),
+  );
   runApp(const MyApp());
 }
 
@@ -55,16 +74,20 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+  RemoteConfigService? _remoteConfigService;
+  String _envName = "Loading...";
 
-  void _incrementCounter() {
+  @override
+  void initState() {
+    super.initState();
+    _setupRemoteConfig(); // Remote Configのセットアップ
+  }
+
+  Future<void> _setupRemoteConfig() async {
+    _remoteConfigService = await RemoteConfigService.create();
+    await _remoteConfigService?.fetchAndActivate();
     setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
+      _envName = _remoteConfigService?.envName ?? "Environment";
     });
   }
 
@@ -106,20 +129,15 @@ class _MyHomePageState extends State<MyHomePage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             const Text(
-              'You have pushed the button this many times:',
+              'Environment',
             ),
             Text(
-              '$_counter',
+              '$_envName',
               style: Theme.of(context).textTheme.headlineMedium,
             ),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
